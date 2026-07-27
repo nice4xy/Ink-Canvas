@@ -1087,10 +1087,11 @@
                                 </Border>
                             </Grid>
                             <ui:SymbolIcon Name="SymbolIconSelect" Symbol="SelectAll" Foreground="{DynamicResource FloatBarForeground}" MouseUp="SymbolIconSelect_MouseUp"/>
-                            <Grid Margin="3,5,0,5" Height="24" ClipToBounds="False">
+                            <Grid x:Name="GridDrawShape" Margin="3,5,0,5" Height="24" ClipToBounds="False">
                                 <Image MouseUp="ImageDrawShape_MouseUp" MouseDown="Border_MouseDown" Margin="-2.5" Source="{DynamicResource DrawShapeImageSource.DrawShapeIcon}"/>
-                                <Border x:Name="BorderDrawShape" Visibility="Visible" Background="{DynamicResource FloatBarBackground}" BorderBrush="{DynamicResource FloatBarBorderBrush}" BorderThickness="1"
-                                    CornerRadius="8" Margin="-100,-265,-100,30" Height="350">
+                                <Popup x:Name="PopupDrawShape" PlacementTarget="{Binding ElementName=GridDrawShape}" Placement="Left" StaysOpen="False" AllowsTransparency="True">
+                                    <Border x:Name="BorderDrawShape" Background="{DynamicResource FloatBarBackground}" BorderBrush="{DynamicResource FloatBarBorderBrush}" BorderThickness="1"
+                                    CornerRadius="8" MaxHeight="380">
                                     <Viewbox Margin="0,0,0,2">
                                         <ui:SimpleStackPanel Spacing="-8" Orientation="Vertical">
                                             <TextBlock FontSize="16" Foreground="{DynamicResource FloatBarForeground}"
@@ -1169,7 +1170,8 @@
                                             </ui:SimpleStackPanel>
                                         </ui:SimpleStackPanel>
                                     </Viewbox>
-                                </Border>
+                                    </Border>
+                                </Popup>
                             </Grid>
                             <ui:SymbolIcon Symbol="Undo" Foreground="{DynamicResource FloatBarForeground}" Margin="0,0,-2,0"
                                            Opacity="{Binding ElementName=BtnUndo, Path=IsEnabled, Converter={StaticResource IsEnabledToOpacityConverter}}"

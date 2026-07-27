@@ -50,7 +50,7 @@ namespace Ink_Canvas
             BorderSettings.Opacity = 0;
             BorderSettings.Visibility = Visibility.Collapsed;
             StackPanelToolButtons.Visibility = Visibility.Collapsed;
-            BorderDrawShape.Visibility = Visibility.Collapsed;
+            PopupDrawShape.IsOpen = false;
             GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
 
             if (App.StartArgs.Contains("-b")) //-b border
@@ -1390,7 +1390,7 @@ namespace Ink_Canvas
         {
             if (ToggleSwitchDrawShapeBorderAutoHide.IsOn)
             {
-                BorderDrawShape.Visibility = Visibility.Collapsed;
+                PopupDrawShape.IsOpen = false;
             }
             GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
             //Label.Content = "isSingleFingerDragMode=" + isSingleFingerDragMode.ToString();
@@ -2068,7 +2068,7 @@ namespace Ink_Canvas
             BorderClearInDelete.Visibility = Visibility.Collapsed;
             if (ToggleSwitchDrawShapeBorderAutoHide.IsOn)
             {
-                BorderDrawShape.Visibility = Visibility.Collapsed;
+                PopupDrawShape.IsOpen = false;
             }
 
             if (NeedUpdateIniP())
@@ -4128,38 +4128,15 @@ namespace Ink_Canvas
 
         private void ImageDrawShape_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (BorderDrawShape.Visibility == Visibility.Visible)
+            if (PopupDrawShape.IsOpen)
             {
-                BorderDrawShape.Visibility = Visibility.Collapsed;
+                PopupDrawShape.IsOpen = false;
             }
             else
             {
                 // 打开前按工具栏当前位置实时刷新弹出方向（拖到右半屏则向左弹，左半屏则向右弹）
-                UpdateFloatingBarPopupMargins(isFloatingBarVertical);
-                BorderDrawShape.Visibility = Visibility.Visible;
-                Dispatcher.BeginInvoke(new Action(KeepShapePanelOnScreen), DispatcherPriority.Loaded);
+                PopupDrawShape.IsOpen = true;
             }
-        }
-
-        private void KeepShapePanelOnScreen()
-        {
-            BorderDrawShape.RenderTransform = Transform.Identity;
-            BorderDrawShape.UpdateLayout();
-            Point topLeft = BorderDrawShape.PointToScreen(new Point(0, 0));
-            double bottom = topLeft.Y + BorderDrawShape.ActualHeight;
-            Rect workArea = SystemParameters.WorkArea;
-            double verticalOffset = 0;
-
-            if (bottom > workArea.Bottom - 8)
-            {
-                verticalOffset = workArea.Bottom - 8 - bottom;
-            }
-            if (topLeft.Y + verticalOffset < workArea.Top + 8)
-            {
-                verticalOffset = workArea.Top + 8 - topLeft.Y;
-            }
-
-            BorderDrawShape.RenderTransform = new TranslateTransform(0, verticalOffset);
         }
 
         #endregion Floating Bar Control
@@ -4257,7 +4234,7 @@ namespace Ink_Canvas
             {
                 if (ToggleSwitchDrawShapeBorderAutoHide.IsOn)
                 {
-                    BorderDrawShape.Visibility = Visibility.Collapsed;
+                    PopupDrawShape.IsOpen = false;
                 }
                 var dA = new DoubleAnimation(1, 1, new Duration(TimeSpan.FromMilliseconds(0)));
                 ImageDrawLine.BeginAnimation(OpacityProperty, dA);
@@ -4279,7 +4256,7 @@ namespace Ink_Canvas
             {
                 if (ToggleSwitchDrawShapeBorderAutoHide.IsOn)
                 {
-                    BorderDrawShape.Visibility = Visibility.Collapsed;
+                    PopupDrawShape.IsOpen = false;
                 }
                 var dA = new DoubleAnimation(1, 1, new Duration(TimeSpan.FromMilliseconds(0)));
                 ImageDrawDashedLine.BeginAnimation(OpacityProperty, dA);
@@ -4301,7 +4278,7 @@ namespace Ink_Canvas
             {
                 if (ToggleSwitchDrawShapeBorderAutoHide.IsOn)
                 {
-                    BorderDrawShape.Visibility = Visibility.Collapsed;
+                    PopupDrawShape.IsOpen = false;
                 }
                 var dA = new DoubleAnimation(1, 1, new Duration(TimeSpan.FromMilliseconds(0)));
                 ImageDrawDotLine.BeginAnimation(OpacityProperty, dA);
@@ -4323,7 +4300,7 @@ namespace Ink_Canvas
             {
                 if (ToggleSwitchDrawShapeBorderAutoHide.IsOn)
                 {
-                    BorderDrawShape.Visibility = Visibility.Collapsed;
+                    PopupDrawShape.IsOpen = false;
                 }
                 var dA = new DoubleAnimation(1, 1, new Duration(TimeSpan.FromMilliseconds(0)));
                 ImageDrawArrow.BeginAnimation(OpacityProperty, dA);
@@ -4345,7 +4322,7 @@ namespace Ink_Canvas
             {
                 if (ToggleSwitchDrawShapeBorderAutoHide.IsOn)
                 {
-                    BorderDrawShape.Visibility = Visibility.Collapsed;
+                    PopupDrawShape.IsOpen = false;
                 }
                 var dA = new DoubleAnimation(1, 1, new Duration(TimeSpan.FromMilliseconds(0)));
                 ImageDrawParallelLine.BeginAnimation(OpacityProperty, dA);
@@ -7105,7 +7082,7 @@ namespace Ink_Canvas
             if (lastBorderMouseDownObject != sender) return;
 
             BorderTools.Visibility = Visibility.Collapsed;
-            BorderDrawShape.Visibility = Visibility.Collapsed;
+            PopupDrawShape.IsOpen = false;
 
             InkCanvasForInkReplay.Visibility = Visibility.Visible;
             inkCanvas.Visibility = Visibility.Collapsed;
@@ -7362,7 +7339,6 @@ namespace Ink_Canvas
         {
             if (!isVertical)
             {
-                BorderDrawShape.Margin = new Thickness(-100, -265, -100, 30);
                 BorderTools.Margin = new Thickness(37, -195, -140, -6);
                 BorderClearInDelete.Margin = new Thickness(-40, -60, -40, 35);
                 return;
@@ -7371,13 +7347,11 @@ namespace Ink_Canvas
             bool openRight = ViewboxFloatingBar.Margin.Left < SystemParameters.WorkArea.Width / 2;
             if (openRight)
             {
-                BorderDrawShape.Margin = new Thickness(30, -100, -265, -100);
                 BorderTools.Margin = new Thickness(37, -140, -195, -6);
                 BorderClearInDelete.Margin = new Thickness(35, -40, -60, -40);
             }
             else
             {
-                BorderDrawShape.Margin = new Thickness(-265, -100, 30, -100);
                 BorderTools.Margin = new Thickness(-195, -140, 37, -6);
                 BorderClearInDelete.Margin = new Thickness(-60, -40, 35, -40);
             }
