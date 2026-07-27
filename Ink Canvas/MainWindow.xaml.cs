@@ -1406,6 +1406,7 @@ namespace Ink_Canvas
             if (StackPanelControl.Visibility == Visibility.Visible)
             {
                 StackPanelControl.Visibility = Visibility.Hidden;
+                PopupDrawShape.IsOpen = false;
             }
             else
             {
@@ -6842,6 +6843,7 @@ namespace Ink_Canvas
         {
             BorderClearInDelete.Visibility = Visibility.Collapsed;
             BorderTools.Visibility = Visibility.Collapsed;
+            PopupDrawShape.IsOpen = false;
         }
 
 
