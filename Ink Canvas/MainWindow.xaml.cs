@@ -7307,10 +7307,15 @@ namespace Ink_Canvas
 
             // 1) 根面板方向：内层通过绑定自动级联
             StackPanelFloatingBar.Orientation = isVertical ? Orientation.Vertical : Orientation.Horizontal;
+            // 1b) 最外层面板（笑脸 + 主控件区容器）在 XAML 硬编码 Horizontal，绑定够不着，需手动切换
+            StackPanelFloatingBarOuter.Orientation = isVertical ? Orientation.Vertical : Orientation.Horizontal;
 
             // 2) Viewbox 约束互换（横排限高 50，竖排限宽 50）
             ViewboxFloatingBar.Width = isVertical ? 50 : double.NaN;
             ViewboxFloatingBar.Height = isVertical ? double.NaN : 50;
+            // 2b) 主控件区 Border 在 XAML 硬编码 Height=36：横排限高、竖排需改为限宽，否则竖排被压扁只显示 1~2 个图标
+            BorderFloatingBarMainControls.Width = isVertical ? 36 : double.NaN;
+            BorderFloatingBarMainControls.Height = isVertical ? double.NaN : 36;
 
             // 3) Margin 左右↔上下互换
             BorderFloatingBarMainControls.Margin = isVertical ? new Thickness(0, 5, 0, 0) : new Thickness(5, 0, 0, 0);

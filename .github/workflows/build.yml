@@ -23,11 +23,9 @@ jobs:
         run: msbuild "Ink Canvas/Ink Canvas.csproj" /t:Restore /p:Configuration=Release
 
       # IAWinFX/IACore/IALoader 均为 x86 DLL，exe 必须以 32 位运行。
-      # csproj 的 Prefer32Bit 条件是 '$(Platform)'=='AnyCPU'（无空格），
-      # 而命令行 /p:Platform="Any CPU"（有空格）会导致条件不匹配、Prefer32Bit 失效，
-      # 因此这里显式 /p:Prefer32Bit=true 强制 32 位运行。
+      # 实测 /p:Prefer32Bit=true 未生效（日志仍报格式不正确），改用 /p:PlatformTarget=x86 直接生成确定的 32 位 exe。
       - name: Build
-        run: msbuild "Ink Canvas/Ink Canvas.csproj" /t:Build /p:Configuration=Release /p:Platform="Any CPU" /p:Prefer32Bit=true
+        run: msbuild "Ink Canvas/Ink Canvas.csproj" /t:Build /p:Configuration=Release /p:Platform="Any CPU" /p:PlatformTarget=x86
 
       - name: Upload build output
         uses: actions/upload-artifact@v4
