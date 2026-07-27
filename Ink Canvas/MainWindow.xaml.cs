@@ -761,7 +761,16 @@ namespace Ink_Canvas
             TextBlockVersion.Text = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             LogHelper.WriteLogToFile("Ink Canvas Loaded", LogHelper.LogType.Event);
 
-            PreloadIALibrary();
+            // 墨迹识别库(IAWinFX, x86)加载失败不应中断 Loaded 流程，
+            // 否则 isLoaded 无法置为 true，会导致所有设置开关被 if(!isLoaded)return; 拦截而失效。
+            try
+            {
+                PreloadIALibrary();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.NewLog("PreloadIALibrary failed: " + ex.Message);
+            }
 
             SetFloatingBarOrientation(Settings.Appearance.IsFloatingBarVertical, resetPosition: false);
 
