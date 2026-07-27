@@ -1075,7 +1075,7 @@
                                     </Image.Source>
                                 </Image>
                             </Grid>
-                            <Grid Margin="0,0,0,0" Width="20">
+                            <Grid Margin="0,0,0,0" Width="20" Height="24" ClipToBounds="False">
                                 <ui:SymbolIcon Name="SymbolIconDelete" Symbol="Delete" Foreground="{DynamicResource FloatBarForeground}" 
                                                MouseDown="Border_MouseDown" MouseUp="SymbolIconDelete_MouseUp"/>
                                 <Border x:Name="BorderClearInDelete" Visibility="Collapsed" Background="White" BorderBrush="{DynamicResource FloatBarBorderBrush}" BorderThickness="1"

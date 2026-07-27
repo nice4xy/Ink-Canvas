@@ -93,7 +93,7 @@ namespace Ink_Canvas
         [JsonProperty("theme")]
         public int Theme { get; set; } = 0;
         [JsonProperty("isFloatingBarVertical")]
-        public bool IsFloatingBarVertical { get; set; } = false;
+        public bool IsFloatingBarVertical { get; set; } = true;
     }
 
     public class PowerPointSettings

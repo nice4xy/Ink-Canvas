@@ -772,7 +772,8 @@ namespace Ink_Canvas
                 LogHelper.NewLog("PreloadIALibrary failed: " + ex.Message);
             }
 
-            SetFloatingBarOrientation(Settings.Appearance.IsFloatingBarVertical, resetPosition: false);
+            // 竖排启动时重置到该方向默认位置（屏幕右侧居中）；横排保持原逻辑不重置
+            SetFloatingBarOrientation(Settings.Appearance.IsFloatingBarVertical, resetPosition: Settings.Appearance.IsFloatingBarVertical);
 
             isLoaded = true;
         }
@@ -7335,6 +7336,8 @@ namespace Ink_Canvas
             // 6) 切换方向后旧位置可能越界，重置为该方向默认位置
             if (resetPosition)
             {
+                // 强制布局刷新，使 ActualWidth/ActualHeight 反映新方向尺寸后再定位（否则会用横排旧值算右侧居中）
+                ViewboxFloatingBar.UpdateLayout();
                 ViewboxFloatingBar.Margin = GetDefaultFloatingBarMargin();
                 pointDesktop = new Point(ViewboxFloatingBar.Margin.Left, ViewboxFloatingBar.Margin.Top);
                 pointPPT = pointDesktop;
@@ -7370,9 +7373,10 @@ namespace Ink_Canvas
         {
             if (isFloatingBarVertical)
             {
-                // 竖排默认：屏幕左侧垂直居中
+                // 竖排默认：屏幕右侧垂直居中
                 double defaultTop = (SystemParameters.WorkArea.Height - ViewboxFloatingBar.ActualHeight) / 2;
-                return new Thickness(30, Math.Max(0, defaultTop), -2000, -200);
+                double defaultLeft = SystemParameters.WorkArea.Width - ViewboxFloatingBar.ActualWidth - 30;
+                return new Thickness(Math.Max(0, defaultLeft), Math.Max(0, defaultTop), -2000, -200);
             }
             // 横排默认：底部居中（沿用原逻辑）
             return new Thickness((SystemParameters.WorkArea.Width - ViewboxFloatingBar.ActualWidth) / 2,
