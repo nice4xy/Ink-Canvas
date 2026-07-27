@@ -405,7 +405,7 @@
                                                VerticalAlignment="Bottom" Margin="10,0,0,8"
                                                FontSize="14"/>
                                 </StackPanel>
-                                <ui:ToggleSwitch Name="ToggleSwitchShowCursor" Header="显示画笔光标" IsOn="False" FontFamily="Microsoft YaHei UI" OnContent="开" OffContent="关" Toggled="ToggleSwitchShowCursor_Toggled"/>
+                                <ui:ToggleSwitch Name="ToggleSwitchShowCursor" Header="显示画笔光标" IsOn="True" FontFamily="Microsoft YaHei UI" OnContent="开" OffContent="关" Toggled="ToggleSwitchShowCursor_Toggled"/>
                                 <TextBlock Text="画笔样式" FontFamily="Microsoft YaHei UI" FontSize="14"/>
                                 <ComboBox Name="ComboBoxPenStyle" FontFamily="Microsoft YaHei UI" SelectedIndex="0" SelectionChanged="ComboBoxPenStyle_SelectionChanged">
                                     <ComboBoxItem Content="模拟笔锋（根据墨迹尾部计算）" FontFamily="Microsoft YaHei UI"/>
@@ -1090,7 +1090,7 @@
                             <Grid Margin="3,5,0,5" Height="24" ClipToBounds="False">
                                 <Image MouseUp="ImageDrawShape_MouseUp" MouseDown="Border_MouseDown" Margin="-2.5" Source="{DynamicResource DrawShapeImageSource.DrawShapeIcon}"/>
                                 <Border x:Name="BorderDrawShape" Visibility="Visible" Background="{DynamicResource FloatBarBackground}" BorderBrush="{DynamicResource FloatBarBorderBrush}" BorderThickness="1"
-                                    CornerRadius="8" Margin="-100,-265,-100,30" Height="240">
+                                    CornerRadius="8" Margin="-100,-265,-100,30" Height="350">
                                     <Viewbox Margin="0,0,0,2">
                                         <ui:SimpleStackPanel Spacing="-8" Orientation="Vertical">
                                             <TextBlock FontSize="16" Foreground="{DynamicResource FloatBarForeground}"

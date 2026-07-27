@@ -816,6 +816,15 @@ namespace Ink_Canvas
                 catch { }
             }
 
+            // Existing settings created by older builds defaulted to hiding the
+            // cursor.  Migrate them once to the visible-cursor default.
+            if (!Settings.Canvas.CursorPreferenceInitialized)
+            {
+                Settings.Canvas.IsShowCursor = true;
+                Settings.Canvas.CursorPreferenceInitialized = true;
+                SaveSettingsToFile();
+            }
+
             if (Settings.Startup.IsAutoEnterModeFinger)
             {
                 ToggleSwitchModeFinger.IsOn = true;

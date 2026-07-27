@@ -27,7 +27,9 @@ namespace Ink_Canvas
         [JsonProperty("inkWidth")]
         public double InkWidth { get; set; } = 2.5;
         [JsonProperty("isShowCursor")]
-        public bool IsShowCursor { get; set; } = false;
+        public bool IsShowCursor { get; set; } = true;
+        [JsonProperty("cursorPreferenceInitialized")]
+        public bool CursorPreferenceInitialized { get; set; }
         [JsonProperty("inkStyle")]
         public int InkStyle { get; set; } = 0;
         [JsonProperty("eraserSize")]
