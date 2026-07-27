@@ -2927,7 +2927,7 @@ namespace Ink_Canvas
             }
         }
 
-        private async void PPTNavigationBtn_Click(object sender, RoutedEventArgs e)
+        private void BtnPPTSlideShow_Click(object sender, RoutedEventArgs e)
         {
             new Thread(new ThreadStart(() =>
             {
