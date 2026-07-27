@@ -28,9 +28,21 @@ jobs:
       - name: Build x86 release
         run: msbuild "Ink Canvas/Ink Canvas.csproj" /t:Build /p:Configuration=Release /p:Platform="Any CPU" /p:PlatformTarget=x86
 
+      - name: Stage build output
+        shell: pwsh
+        run: |
+          $executable = Get-ChildItem -Path "Ink Canvas/bin" -Filter "Ink Canvas.exe" -Recurse | Select-Object -First 1
+          if ($null -eq $executable) {
+            throw "Build completed but Ink Canvas.exe was not found under Ink Canvas/bin."
+          }
+
+          $stagingDirectory = "artifacts/Ink-Canvas-x86"
+          New-Item -ItemType Directory -Path $stagingDirectory -Force | Out-Null
+          Copy-Item -Path (Join-Path $executable.DirectoryName "*") -Destination $stagingDirectory -Recurse -Force
+
       - name: Upload build output
         uses: actions/upload-artifact@v4
         with:
           name: Ink-Canvas-x86
-          path: "Ink Canvas/bin/Release/"
+          path: "artifacts/Ink-Canvas-x86/"
           if-no-files-found: error
