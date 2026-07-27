@@ -51,14 +51,17 @@ namespace Ink_Canvas
 
             StartArgs = e.Args;
 
+            // A locally built copy must not hand control to the public release
+            // updater.  It can replace the build with a different release (or
+            // terminate this process while attempting to do so).  Enable this
+            // explicitly only in the official release pipeline.
+#if ENABLE_PUBLIC_AUTO_UPDATE
             if (!StoreHelper.IsStoreApp)
             {
-                AutoUpdater.Start($"http://ink.wxriw.cn:1957/update");
-                AutoUpdater.ApplicationExitEvent += () =>
-                {
-                    Environment.Exit(0);
-                };
+                AutoUpdater.Start("http://ink.wxriw.cn:1957/update");
+                AutoUpdater.ApplicationExitEvent += () => Environment.Exit(0);
             }
+#endif
         }
 
         private void ScrollViewer_PreviewMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)

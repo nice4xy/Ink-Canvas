@@ -1,6 +1,7 @@
 name: Build
 
 on:
+  workflow_dispatch:
   push:
     branches: [ master ]
   pull_request:
@@ -24,11 +25,12 @@ jobs:
 
       # IAWinFX/IACore/IALoader 均为 x86 DLL，exe 必须以 32 位运行。
       # 实测 /p:Prefer32Bit=true 未生效（日志仍报格式不正确），改用 /p:PlatformTarget=x86 直接生成确定的 32 位 exe。
-      - name: Build
+      - name: Build x86 release
         run: msbuild "Ink Canvas/Ink Canvas.csproj" /t:Build /p:Configuration=Release /p:Platform="Any CPU" /p:PlatformTarget=x86
 
       - name: Upload build output
         uses: actions/upload-artifact@v4
         with:
-          name: Ink-Canvas
+          name: Ink-Canvas-x86
           path: "Ink Canvas/bin/Release/"
+          if-no-files-found: error

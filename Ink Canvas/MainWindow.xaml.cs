@@ -701,7 +701,11 @@ namespace Ink_Canvas
                         TextBlockVersion.Text = version.ToString();
 
                         string lastVersion = "";
-                        if (response.Contains("Special Version") && !File.Exists(App.RootPath + "Versions.ini"))
+                        // The old condition depended on an online service before the
+                        // first-run wizard could appear.  When the service is offline,
+                        // its default "run at startup" option is never applied, so the
+                        // application appears to disappear after a Windows restart.
+                        if (!File.Exists(Path.Combine(App.RootPath, "Versions.ini")))
                         {
                             LogHelper.WriteLogToFile("Welcome Window Show Dialog", LogHelper.LogType.Event);
 
@@ -6549,7 +6553,9 @@ namespace Ink_Canvas
                 shortcut.TargetPath = System.Windows.Forms.Application.ExecutablePath;
                 //应用程序的工作目录
                 //当用户没有指定一个具体的目录时，快捷方式的目标应用程序将使用该属性所指定的目录来装载或保存文件。
-                shortcut.WorkingDirectory = System.Environment.CurrentDirectory;
+                // Startup shortcuts are executed with an arbitrary current directory.
+                // Keep all relative files (settings, logs, versions) next to the app.
+                shortcut.WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
                 //目标应用程序窗口类型(1.Normal window普通窗口,3.Maximized最大化窗口,7.Minimized最小化)
                 shortcut.WindowStyle = 1;
                 //快捷方式的描述
