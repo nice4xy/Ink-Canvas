@@ -4143,6 +4143,8 @@ namespace Ink_Canvas
             }
             else
             {
+                // 打开前按工具栏当前位置实时刷新弹出方向（拖到右半屏则向左弹，左半屏则向右弹）
+                UpdateFloatingBarPopupMargins(isFloatingBarVertical);
                 BorderDrawShape.Visibility = Visibility.Visible;
             }
         }
@@ -6996,14 +6998,8 @@ namespace Ink_Canvas
                 }
                 //ViewboxFloatingBar.Margin = new Thickness(10, SystemParameters.PrimaryScreenHeight - 60, -2000, -200);
 
-                new Thread(new ThreadStart(() =>
-                {
-                    Thread.Sleep(100);
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        ViewboxFloatingBar.Margin = GetDefaultFloatingBarMargin();
-                    });
-                })).Start();
+                // 竖排/拖动后进入黑板保持工具栏当前位置，不再强制重置到屏幕侧边默认位置
+                // （原逻辑：100ms 后重置到 GetDefaultFloatingBarMargin()，会把拖到右侧的工具栏拉回左侧）
                 if (Settings.Canvas.UsingWhiteboard)
                 {
                     BorderPenColorBlack_MouseUp(BorderPenColorBlack, null);
@@ -7194,6 +7190,8 @@ namespace Ink_Canvas
             }
             else
             {
+                // 打开前按工具栏当前位置实时刷新弹出方向（拖到右半屏则向左弹，左半屏则向右弹）
+                UpdateFloatingBarPopupMargins(isFloatingBarVertical);
                 BorderTools.Visibility = Visibility.Visible;
             }
         }
