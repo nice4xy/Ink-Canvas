@@ -700,50 +700,27 @@ namespace Ink_Canvas
                         Version version = Assembly.GetExecutingAssembly().GetName().Version;
                         TextBlockVersion.Text = version.ToString();
 
+                        string versionsFile = Path.Combine(App.RootPath, "Versions.ini");
                         string lastVersion = "";
-                        // The old condition depended on an online service before the
-                        // first-run wizard could appear.  When the service is offline,
-                        // its default "run at startup" option is never applied, so the
-                        // application appears to disappear after a Windows restart.
-                        if (!File.Exists(Path.Combine(App.RootPath, "Versions.ini")))
+                        if (!File.Exists(versionsFile))
                         {
-                            LogHelper.WriteLogToFile("Welcome Window Show Dialog", LogHelper.LogType.Event);
-
-                            if (response.Contains("Special Version Alhua"))
-                            {
-                                WelcomeWindow.IsNewBuilding = true;
-                            }
-                            new WelcomeWindow().ShowDialog();
+                            // First-run setup is intentionally non-interactive.  It
+                            // creates the startup shortcut requested by this build
+                            // without showing the legacy school-specific wizard.
+                            StartAutomaticallyCreate("InkCanvas");
+                            lastVersion = version + "\nNewWelcomeConfigured";
+                            File.WriteAllText(versionsFile, lastVersion);
                         }
                         else
                         {
-                            try
-                            {
-                                lastVersion = File.ReadAllText(App.RootPath + "Versions.ini");
-                            }
+                            try { lastVersion = File.ReadAllText(versionsFile); }
                             catch { }
-                            if (response.Contains("Special Version") && !lastVersion.Contains("NewWelcomeConfigured"))
-                            {
-                                LogHelper.WriteLogToFile("Welcome Window Show Dialog (Second time)", LogHelper.LogType.Event);
+                        }
 
-                                if (response.Contains("Special Version Alhua"))
-                                {
-                                    WelcomeWindow.IsNewBuilding = true;
-                                }
-                                new WelcomeWindow().ShowDialog();
-                            }
-                            try
-                            {
-                                lastVersion = File.ReadAllText(App.RootPath + "Versions.ini");
-                            }
-                            catch { }
-                            if (!lastVersion.Contains(version.ToString()))
-                            {
-                                //LogHelper.WriteLogToFile("Change Log Window Show Dialog", LogHelper.LogType.Event);
-                                //new ChangeLogWindow().ShowDialog();
-                                lastVersion += "\n" + version.ToString();
-                                File.WriteAllText(App.RootPath + "Versions.ini", lastVersion.Trim());
-                            }
+                        if (!lastVersion.Contains(version.ToString()))
+                        {
+                            lastVersion += "\n" + version;
+                            File.WriteAllText(versionsFile, lastVersion.Trim());
                         }
                     });
                 }
@@ -4151,7 +4128,29 @@ namespace Ink_Canvas
                 // 打开前按工具栏当前位置实时刷新弹出方向（拖到右半屏则向左弹，左半屏则向右弹）
                 UpdateFloatingBarPopupMargins(isFloatingBarVertical);
                 BorderDrawShape.Visibility = Visibility.Visible;
+                Dispatcher.BeginInvoke(new Action(KeepShapePanelOnScreen), DispatcherPriority.Loaded);
             }
+        }
+
+        private void KeepShapePanelOnScreen()
+        {
+            BorderDrawShape.RenderTransform = Transform.Identity;
+            BorderDrawShape.UpdateLayout();
+            Point topLeft = BorderDrawShape.PointToScreen(new Point(0, 0));
+            double bottom = topLeft.Y + BorderDrawShape.ActualHeight;
+            Rect workArea = SystemParameters.WorkArea;
+            double verticalOffset = 0;
+
+            if (bottom > workArea.Bottom - 8)
+            {
+                verticalOffset = workArea.Bottom - 8 - bottom;
+            }
+            if (topLeft.Y + verticalOffset < workArea.Top + 8)
+            {
+                verticalOffset = workArea.Top + 8 - topLeft.Y;
+            }
+
+            BorderDrawShape.RenderTransform = new TranslateTransform(0, verticalOffset);
         }
 
         #endregion Floating Bar Control

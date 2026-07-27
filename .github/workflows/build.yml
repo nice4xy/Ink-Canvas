@@ -25,8 +25,8 @@ jobs:
 
       # IAWinFX/IACore/IALoader 均为 x86 DLL，exe 必须以 32 位运行。
       # 实测 /p:Prefer32Bit=true 未生效（日志仍报格式不正确），改用 /p:PlatformTarget=x86 直接生成确定的 32 位 exe。
-      - name: Build x86 release
-        run: msbuild "Ink Canvas/Ink Canvas.csproj" /t:Build /p:Configuration=Release /p:Platform="Any CPU" /p:PlatformTarget=x86
+      - name: Build x64 release
+        run: msbuild "Ink Canvas/Ink Canvas.csproj" /t:Build /p:Configuration=Release /p:Platform=x64
 
       - name: Stage build output
         shell: pwsh
@@ -36,13 +36,13 @@ jobs:
             throw "Build completed but Ink Canvas.exe was not found under Ink Canvas/bin."
           }
 
-          $stagingDirectory = "artifacts/Ink-Canvas-x86"
+          $stagingDirectory = "artifacts/Ink-Canvas-x64"
           New-Item -ItemType Directory -Path $stagingDirectory -Force | Out-Null
           Copy-Item -Path (Join-Path $executable.DirectoryName "*") -Destination $stagingDirectory -Recurse -Force
 
       - name: Upload build output
         uses: actions/upload-artifact@v4
         with:
-          name: Ink-Canvas-x86
-          path: "artifacts/Ink-Canvas-x86/"
+          name: Ink-Canvas-x64
+          path: "artifacts/Ink-Canvas-x64/"
           if-no-files-found: error
