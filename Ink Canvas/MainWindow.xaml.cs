@@ -763,6 +763,8 @@ namespace Ink_Canvas
 
             PreloadIALibrary();
 
+            SetFloatingBarOrientation(Settings.Appearance.IsFloatingBarVertical, resetPosition: false);
+
             isLoaded = true;
         }
 
@@ -874,6 +876,7 @@ namespace Ink_Canvas
             PptNavigationBtn.Visibility =
                 Settings.PowerPointSettings.IsShowPPTNavigation ? Visibility.Visible : Visibility.Collapsed;
             ToggleSwitchShowButtonPPTNavigation.IsOn = Settings.PowerPointSettings.IsShowPPTNavigation;
+            ToggleSwitchVerticalFloatingBar.IsOn = Settings.Appearance.IsFloatingBarVertical;
 
             ComboBoxTheme.SelectedIndex = Settings.Appearance.Theme;
             if (Settings.Appearance.IsShowHideControlButton)
@@ -2665,7 +2668,7 @@ namespace Ink_Canvas
                     Thread.Sleep(100);
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        ViewboxFloatingBar.Margin = new Thickness((SystemParameters.PrimaryScreenWidth - ViewboxFloatingBar.ActualWidth) / 2, SystemParameters.PrimaryScreenHeight - 60, -2000, -200);
+                        ViewboxFloatingBar.Margin = GetDefaultFloatingBarMargin();
                     });
                 })).Start();
             });
@@ -2916,15 +2919,15 @@ namespace Ink_Canvas
             // 控制居中
             if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
             {
-                if (ViewboxFloatingBar.Margin == new Thickness((SystemParameters.PrimaryScreenWidth - ViewboxFloatingBar.ActualWidth) / 2, SystemParameters.PrimaryScreenHeight - 60, -2000, -200))
+                if (ViewboxFloatingBar.Margin == GetDefaultFloatingBarMargin())
                 {
                     await Task.Delay(100);
-                    ViewboxFloatingBar.Margin = new Thickness((SystemParameters.PrimaryScreenWidth - ViewboxFloatingBar.ActualWidth) / 2, SystemParameters.PrimaryScreenHeight - 60, -2000, -200);
+                    ViewboxFloatingBar.Margin = GetDefaultFloatingBarMargin();
                 }
             }
         }
 
-        private void BtnPPTSlideShow_Click(object sender, RoutedEventArgs e)
+        private async void PPTNavigationBtn_Click(object sender, RoutedEventArgs e)
         {
             new Thread(new ThreadStart(() =>
             {
@@ -3077,6 +3080,14 @@ namespace Ink_Canvas
 
             PptNavigationBtn.Visibility =
                 Settings.PowerPointSettings.IsShowPPTNavigation ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void ToggleSwitchVerticalFloatingBar_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.IsFloatingBarVertical = ToggleSwitchVerticalFloatingBar.IsOn;
+            SaveSettingsToFile();
+            SetFloatingBarOrientation(ToggleSwitchVerticalFloatingBar.IsOn);
         }
 
         private void ComboBoxTheme_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -6893,10 +6904,10 @@ namespace Ink_Canvas
 
                 if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
                 {
-                    if (ViewboxFloatingBar.Margin == new Thickness((SystemParameters.PrimaryScreenWidth - ViewboxFloatingBar.ActualWidth) / 2, SystemParameters.PrimaryScreenHeight - 60, -2000, -200))
+                    if (ViewboxFloatingBar.Margin == GetDefaultFloatingBarMargin())
                     {
                         await Task.Delay(100);
-                        ViewboxFloatingBar.Margin = new Thickness((SystemParameters.PrimaryScreenWidth - ViewboxFloatingBar.ActualWidth) / 2, SystemParameters.PrimaryScreenHeight - 60, -2000, -200);
+                        ViewboxFloatingBar.Margin = GetDefaultFloatingBarMargin();
                     }
                 }
             }
@@ -6981,7 +6992,7 @@ namespace Ink_Canvas
                     Thread.Sleep(100);
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        ViewboxFloatingBar.Margin = new Thickness((SystemParameters.PrimaryScreenWidth - ViewboxFloatingBar.ActualWidth) / 2, SystemParameters.PrimaryScreenHeight - 60, -2000, -200);
+                        ViewboxFloatingBar.Margin = GetDefaultFloatingBarMargin();
                     });
                 })).Start();
                 if (Settings.Canvas.UsingWhiteboard)
@@ -7013,7 +7024,7 @@ namespace Ink_Canvas
                         Thread.Sleep(100);
                         Application.Current.Dispatcher.Invoke(() =>
                         {
-                            ViewboxFloatingBar.Margin = new Thickness((SystemParameters.PrimaryScreenWidth - ViewboxFloatingBar.ActualWidth) / 2, SystemParameters.PrimaryScreenHeight - 60, -2000, -200);
+                            ViewboxFloatingBar.Margin = GetDefaultFloatingBarMargin();
                         });
                     })).Start();
                 }
@@ -7224,6 +7235,9 @@ namespace Ink_Canvas
             {
                 double xPos = e.GetPosition(null).X - pos.X + ViewboxFloatingBar.Margin.Left;
                 double yPos = e.GetPosition(null).Y - pos.Y + ViewboxFloatingBar.Margin.Top;
+                // 边界钳制，防止工具栏被拖出屏幕
+                xPos = Math.Max(0, Math.Min(xPos, SystemParameters.WorkArea.Width - ViewboxFloatingBar.ActualWidth));
+                yPos = Math.Max(0, Math.Min(yPos, SystemParameters.WorkArea.Height - ViewboxFloatingBar.ActualHeight));
                 ViewboxFloatingBar.Margin = new Thickness(xPos, yPos, -2000, -200);
                 pos = e.GetPosition(null);
             }
@@ -7256,9 +7270,11 @@ namespace Ink_Canvas
         void SetBorderFloatingBarMainControlsVisibility(bool isVisible, bool isAnimated = true)
         {
             borderFloatingBarMainControlsVisibility = isVisible;
+            // 竖排时沿 Y 轴收拢（从顶部笑脸图标向下展开），横排沿 X 轴
+            var scaleProperty = isFloatingBarVertical ? ScaleTransform.ScaleYProperty : ScaleTransform.ScaleXProperty;
             if (!isVisible)
             {
-                BorderFloatingBarMainControls.RenderTransform.BeginAnimation(ScaleTransform.ScaleXProperty, new DoubleAnimation(0, TimeSpan.FromMilliseconds(isAnimated ? 100 : 0))
+                BorderFloatingBarMainControls.RenderTransform.BeginAnimation(scaleProperty, new DoubleAnimation(0, TimeSpan.FromMilliseconds(isAnimated ? 100 : 0))
                 {
                     EasingFunction = new PowerEase() { Power = 4, EasingMode = EasingMode.EaseOut },
                 });
@@ -7266,12 +7282,89 @@ namespace Ink_Canvas
             }
             else
             {
-                BorderFloatingBarMainControls.RenderTransform.BeginAnimation(ScaleTransform.ScaleXProperty, new DoubleAnimation(1, TimeSpan.FromMilliseconds(isAnimated ? 160 : 0))
+                BorderFloatingBarMainControls.RenderTransform.BeginAnimation(scaleProperty, new DoubleAnimation(1, TimeSpan.FromMilliseconds(isAnimated ? 160 : 0))
                 {
                     EasingFunction = new PowerEase() { Power = 4, EasingMode = EasingMode.EaseOut },
                 });
                 BorderFloatingBarMainControls.BeginAnimation(OpacityProperty, new DoubleAnimation(1, TimeSpan.FromMilliseconds(isAnimated ? 160 : 0)));
             }
+        }
+
+        bool isFloatingBarVertical = false;
+
+        void SetFloatingBarOrientation(bool isVertical, bool resetPosition = true)
+        {
+            isFloatingBarVertical = isVertical;
+
+            // 1) 根面板方向：内层通过绑定自动级联
+            StackPanelFloatingBar.Orientation = isVertical ? Orientation.Vertical : Orientation.Horizontal;
+
+            // 2) Viewbox 约束互换（横排限高 50，竖排限宽 50）
+            ViewboxFloatingBar.Width = isVertical ? 50 : double.NaN;
+            ViewboxFloatingBar.Height = isVertical ? double.NaN : 50;
+
+            // 3) Margin 左右↔上下互换
+            BorderFloatingBarMainControls.Margin = isVertical ? new Thickness(0, 5, 0, 0) : new Thickness(5, 0, 0, 0);
+            StackPanelCanvacMain.Margin = isVertical ? new Thickness(5, 10, 5, 0) : new Thickness(10, 5, 0, 5);
+            StackPanelCanvasControls.Margin = isVertical ? new Thickness(5, 10, 5, 0) : new Thickness(10, 5, 0, 5);
+            CursorIconGridInFloatingBar.Margin = isVertical ? new Thickness(0, -10, 0, 0) : new Thickness(-10, 0, 0, 0);
+            EraserContainer.Margin = isVertical ? new Thickness(1.5, 0, 0, -2) : new Thickness(0, 1.5, -2, 0);
+            BlackboardIconGrid.Margin = isVertical ? new Thickness(0, 2, 1, 12) : new Thickness(2, 0, 12, 1);
+            PPTEndIconGrid.Margin = isVertical ? new Thickness(5, 0, 5, 0) : new Thickness(0, 5, 0, 5);
+            StackPanelShotTools.Margin = isVertical ? new Thickness(5, 0, 5, 10) : new Thickness(0, 5, 10, 5);
+
+            // 4) 占位 Grid 宽高互换
+            GridFloatingBarSpacer.Width = isVertical ? 24 : 0;
+            GridFloatingBarSpacer.Height = isVertical ? 0 : 24;
+
+            // 5) 弹出面板方向
+            UpdateFloatingBarPopupMargins(isVertical);
+
+            // 6) 切换方向后旧位置可能越界，重置为该方向默认位置
+            if (resetPosition)
+            {
+                ViewboxFloatingBar.Margin = GetDefaultFloatingBarMargin();
+                pointDesktop = new Point(ViewboxFloatingBar.Margin.Left, ViewboxFloatingBar.Margin.Top);
+                pointPPT = pointDesktop;
+            }
+        }
+
+        void UpdateFloatingBarPopupMargins(bool isVertical)
+        {
+            if (!isVertical)
+            {
+                BorderDrawShape.Margin = new Thickness(-100, -265, -100, 30);
+                BorderTools.Margin = new Thickness(37, -195, -140, -6);
+                BorderClearInDelete.Margin = new Thickness(-40, -60, -40, 35);
+                return;
+            }
+            // 竖排：向屏幕中心一侧弹出（工具栏在左半屏则向右弹，反之向左弹）
+            bool openRight = ViewboxFloatingBar.Margin.Left < SystemParameters.WorkArea.Width / 2;
+            if (openRight)
+            {
+                BorderDrawShape.Margin = new Thickness(30, -100, -265, -100);
+                BorderTools.Margin = new Thickness(37, -140, -195, -6);
+                BorderClearInDelete.Margin = new Thickness(35, -40, -60, -40);
+            }
+            else
+            {
+                BorderDrawShape.Margin = new Thickness(-265, -100, 30, -100);
+                BorderTools.Margin = new Thickness(-195, -140, 37, -6);
+                BorderClearInDelete.Margin = new Thickness(-60, -40, 35, -40);
+            }
+        }
+
+        Thickness GetDefaultFloatingBarMargin()
+        {
+            if (isFloatingBarVertical)
+            {
+                // 竖排默认：屏幕左侧垂直居中
+                double defaultTop = (SystemParameters.WorkArea.Height - ViewboxFloatingBar.ActualHeight) / 2;
+                return new Thickness(30, Math.Max(0, defaultTop), -2000, -200);
+            }
+            // 横排默认：底部居中（沿用原逻辑）
+            return new Thickness((SystemParameters.WorkArea.Width - ViewboxFloatingBar.ActualWidth) / 2,
+                                 SystemParameters.WorkArea.Height - 60, -2000, -200);
         }
 
         #endregion

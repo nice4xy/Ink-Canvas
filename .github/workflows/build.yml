@@ -1,0 +1,32 @@
+name: Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # VS 自带的 MSBuild 对 net472 WPF / COM / WinMD 引用支持最完整
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v2
+
+      # SDK 风格的 PackageReference 工程可用 msbuild /t:Restore 还原 NuGet 包
+      - name: Restore NuGet packages
+        run: msbuild "Ink Canvas/Ink Canvas.csproj" /t:Restore /p:Configuration=Release
+
+      - name: Build
+        run: msbuild "Ink Canvas/Ink Canvas.csproj" /t:Build /p:Configuration=Release /p:Platform="Any CPU"
+
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ink-Canvas
+          path: "Ink Canvas/bin/Release/"

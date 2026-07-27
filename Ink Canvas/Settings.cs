@@ -92,6 +92,8 @@ namespace Ink_Canvas
         public bool IsShowModeFingerToggleSwitch { get; set; } = true;
         [JsonProperty("theme")]
         public int Theme { get; set; } = 0;
+        [JsonProperty("isFloatingBarVertical")]
+        public bool IsFloatingBarVertical { get; set; } = false;
     }
 
     public class PowerPointSettings
